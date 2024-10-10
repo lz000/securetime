@@ -5,6 +5,7 @@ import pl.tajchert.securetime.protocol.RtWire
 import pl.tajchert.securetime.util.BytesUtil
 import timber.log.Timber
 import java.math.BigInteger
+import java.net.Inet6Address
 import java.net.InetSocketAddress
 import java.net.StandardProtocolFamily
 import java.nio.ByteBuffer
@@ -35,7 +36,13 @@ public class SecureTime(
     fun getTime(): Triple<Instant, Int, Long> {
         val addr = InetSocketAddress(host, port)
 
-        val channel = DatagramChannel.open(StandardProtocolFamily.INET)
+        val family = if (addr.address is Inet6Address) {
+            StandardProtocolFamily.INET6
+        } else {
+            StandardProtocolFamily.INET
+        }
+
+        val channel = DatagramChannel.open(family)
         channel.configureBlocking(false)
 
         // Create a request message
